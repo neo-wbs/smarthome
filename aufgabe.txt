@@ -1,0 +1,2 @@
+Nehmt den Kommentar bei der checkstyle.xml <module name="NeedBraces"/> raus und macht ein Stylecheck.
+Korrigiert die Fehler im Code (fehlende {}) bis Stylecheck erfolgreich ist.

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+    "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+    "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<!--
+  Bewusst entschlackte Checkstyle-Konfiguration:
+  Prüft nur auf echte Probleme (ungenutzte Imports, fehlende Javadoc-Pakete,
+  doppelte Leerzeilen), nicht auf Einrückungstiefe/Klammerstil.
+  Die Google-Vorlage (checkstyle.xml) ist für Teams mit festem Format-Standard
+  gedacht - für ein Einzelprojekt reicht diese Auswahl.
+-->
+<module name="Checker">
+
+    <!-- Keine ungenutzten Imports -->
+    <module name="TreeWalker">
+        <module name="UnusedImports"/>
+        <module name="RedundantImport"/>
+
+        <!-- Keine leeren catch-Blöcke ohne Kommentar (zwingt zu bewusster Fehlerbehandlung) -->
+        <module name="EmptyCatchBlock">
+            <property name="commentFormat" value=".*"/>
+        </module>
+
+        <!-- Geschweifte Klammern bei if/else/for/while - verhindert klassische Bugs -->
+        <module name="NeedBraces"/>
+
+        <!-- Keine doppelten/leeren Semikolons -->
+        <module name="EmptyStatement"/>
+    </module>
+
+    <!-- Keine Tabs, nur Leerzeichen (verhindert Mischformate zwischen Editoren) -->
+    <module name="FileTabCharacter"/>
+
+</module>

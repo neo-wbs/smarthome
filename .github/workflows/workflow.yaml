@@ -1,0 +1,35 @@
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: Java 25 installieren
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Lint (Checkstyle)
+        run: mvn checkstyle:check
+
+      - name: Tests ausführen
+        run: mvn test
+
+      - name: JAR bauen
+        run: mvn package -DskipTests
+
+      - name: JAR als Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitoring_projekt-jar
+          path: target/monitoring_projekt.jar
