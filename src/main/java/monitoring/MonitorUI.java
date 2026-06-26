@@ -36,7 +36,7 @@ public class MonitorUI extends JFrame {
     private final JButton btnLoad = new JButton("CSV wählen …");
     private final JButton btnStop = new JButton("Stop");
 
-    private final Map<String, LaufzeitStatistik> statistikTypen = new HashMap<>();
+    private final Map<String, LaufzeitStatistik> statistiken = new HashMap<>();
 
     private BlockingQueue<Messwert> queue;
     private Thread producerThread;
@@ -142,7 +142,7 @@ public class MonitorUI extends JFrame {
     private void startStreaming(File[] files) {
         modMesswerte.setRowCount(0);
         modAlertList.clear();
-        statistikTypen.clear();
+        statistiken.clear();
         //Liste hat 2 Probleme: nicht threadsafe, kann nicht warten (müsste in
         //Endlosschleife fragen: Sind Daten da?)
         //Lösung Queue: Producer legt Daten rein, Consumer nimmt Element raus und
@@ -184,6 +184,15 @@ public class MonitorUI extends JFrame {
                 if(messwert == POISON_PILL) {
                     break;
                 }
+                double schwellenwert = messwert.typ().equals("temperature")?
+                        parseDouble(txtTempSchwelle.getText(), 22.4):
+                        parseDouble(txtFeuchteSchwelle.getText(), 60.0);
+
+                if(!statistiken.containsKey(messwert.typ())) {
+                    statistiken.put(messwert.typ(), new LaufzeitStatistik(messwert.typ()));
+                }
+                LaufzeitStatistik statistik = statistiken.get(messwert.typ());
+                statistik.add(messwert, schwellenwert);
                 SwingUtilities.invokeLater(() -> onNeuMesswert(messwert));
             }
         });
@@ -192,10 +201,17 @@ public class MonitorUI extends JFrame {
 
     private void onNeuMesswert(Messwert messwert) {
         modMesswerte.addRow(new Object[] {FMT.format(messwert.zeitstempel()), round(messwert.wert()), messwert.typ()});
+
+        lblTemperatur.setText(format(statistiken.get("temperature")));
+        lblFeuchtigkeit.setText(format(statistiken.get("feuchtigkeit")));
     }
 
     private String format(LaufzeitStatistik s) {
-       return "";
+        if(s == null) {
+            return "Keine Daten";
+        }
+        return String.format("n=%d, min=%.2f, max=%.2f, avg=%.2f, alarme=%d",
+                s.count(), s.min(), s.max(), s.avg(), s.alarme().size());
     }
 
     private void stopStreaming() {
